@@ -1,0 +1,5 @@
+---
+minor_changes:
+  - >-
+    Add C(soft_delete_hosts) module to stream controller pagination and soft-delete
+    host_metrics rows whose hostname is not in any inventory.

@@ -1,0 +1,49 @@
+---
+# Example extra-vars for lennysh.aap_maintenance playbooks.
+#
+# Copy and edit:
+#   cp vars/example.yml vars/local.yml
+#
+# Run (from the collection root, or after installing the collection):
+#   ansible-playbook playbooks/soft_delete_hosts.yml -e @vars/local.yml
+
+###############################################################################
+# Authentication (required unless aap_token is set)
+###############################################################################
+# aap_hostname — Gateway URL for your AAP instance (HTTPS).
+aap_hostname: https://aap.example.com
+
+# aap_username / aap_password — Used to mint a short-lived write token for this
+# run when aap_token is not set. The module revokes that token when it finishes.
+aap_username: admin
+aap_password: CHANGE_ME
+
+# aap_validate_certs: true
+#   Validate TLS certificates when calling the gateway/controller API.
+#   Set false for lab hosts with self-signed certificates.
+
+# aap_token: "{{ lookup('env', 'AAP_TOKEN') }}"
+#   Optional. Supply an existing OAuth token instead of username/password.
+#   Tokens you provide are not revoked at the end of the run.
+
+###############################################################################
+# soft_delete_hosts module (playbooks/soft_delete_hosts.yml)
+#
+# Finds controller "host metrics" (hosts known to the platform from past job runs)
+# that are no longer listed in any inventory, and soft-deletes those metrics rows.
+###############################################################################
+# soft_delete: true
+#   When true, DELETE matching host_metrics rows (the soft-delete). When false,
+#   only scan and report how many hosts would be affected — no API deletes.
+
+# page_size: 200
+#   Number of inventory hosts or host_metrics rows per API page. Larger pages
+#   mean fewer HTTP requests but bigger responses. Default 200 is a sensible
+#   controller API page size for most environments.
+
+# return_hostnames: false
+#   When true, include candidate_hostnames in the module result (every hostname
+#   that matched). Leave false for large environments to keep task output small;
+#   candidate_count and soft_deleted_count are always returned.
+
+...

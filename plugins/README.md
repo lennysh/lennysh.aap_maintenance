@@ -1,5 +1,12 @@
 # Collections Plugins Directory
 
-Modules, module_utils, lookups, filters, and other plugin types for
-`lennysh.aap_maintenance` live here. Each plugin type uses its own subdirectory
-(`modules/`, `module_utils/`, `lookup/`, `filter/`, …).
+## Modules
+
+- `soft_delete_hosts` — paginate controller inventories and `host_metrics`, then
+  soft-delete metrics rows whose hostname is not in any inventory.
+
+## module_utils
+
+- `aap_client` — minimal gateway/controller REST client with page streaming
+- `soft_delete` — inventory vs host_metrics comparison logic
+- `auth` — shared `aap_*` authentication argument spec

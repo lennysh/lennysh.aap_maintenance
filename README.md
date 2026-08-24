@@ -7,11 +7,69 @@
 > toward a first stable release. APIs, layouts, and coverage may change
 > without a deprecation cycle until **1.0.0**.
 
-**Maintenance utilities for Ansible Automation Platform 2.5+.**
+**Maintenance utilities for Ansible Automation Platform (AAP) 2.5+.**
 
-Companion to [`lennysh.aap_configuration`](https://github.com/lennysh/lennysh.aap_configuration)
-(Configuration-as-Code). This collection is for operational maintenance of a
-running platform — cleanup, health checks, and related tasks.
+Operational tasks on a running platform: cleanup stale data, health checks, and
+related maintenance workflows. No other Ansible collections are required.
+
+## Modules
+
+| Module | Purpose |
+| ------ | ------- |
+| `soft_delete_hosts` | Soft-delete stale `host_metrics` rows not present in any inventory |
+
+Example playbook: `playbooks/soft_delete_hosts.yml`.
+
+### Soft-delete stale host metrics
+
+AAP tracks hosts that have run jobs in **host metrics** (`/api/controller/v2/host_metrics`).
+That list can grow when VMs are removed from inventories but their metrics rows remain.
+
+This module:
+
+1. Lists every host in all controller inventories
+2. Lists non-deleted `host_metrics` rows
+3. Soft-deletes metrics whose hostname is not in any inventory (case-insensitive compare)
+
+Pagination runs inside the module (one API page at a time) so large environments do not
+load hundreds of pages into Ansible facts.
+
+```yaml
+- name: Soft-delete host_metrics not in any inventory
+  lennysh.aap_maintenance.soft_delete_hosts:
+    aap_hostname: "{{ aap_hostname }}"
+    aap_username: "{{ aap_username }}"
+    aap_password: "{{ aap_password }}"
+    aap_validate_certs: false
+```
+
+Preview only (no deletes):
+
+```yaml
+- lennysh.aap_maintenance.soft_delete_hosts:
+    aap_hostname: "{{ aap_hostname }}"
+    aap_token: "{{ aap_token }}"
+    soft_delete: false
+    return_hostnames: true
+```
+
+Or use check mode on the task when `soft_delete: true` to see what would change.
+
+Playbook:
+
+```bash
+cp vars/example.yml vars/local.yml
+ansible-playbook playbooks/soft_delete_hosts.yml -e @vars/local.yml
+```
+
+### Authentication
+
+Pass `aap_token`, or `aap_username` / `aap_password`. With username/password the module
+mints a short-lived gateway write token, uses it for all API calls, and revokes it on exit.
+Tokens you supply yourself are left intact.
+
+Environment variables are supported (`AAP_HOSTNAME`, `CONTROLLER_HOST`, `AAP_USERNAME`,
+`CONTROLLER_USERNAME`, etc.) — see `vars/example.yml`.
 
 ## Installing
 

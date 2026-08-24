@@ -1,0 +1,33 @@
+---
+- name: Soft-delete host_metrics hosts absent from inventories
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Soft-delete host_metrics hosts absent from all inventories
+      lennysh.aap_maintenance.soft_delete_hosts:
+        aap_hostname: "{{ aap_hostname }}"
+        aap_username: "{{ aap_username }}"
+        aap_password: "{{ aap_password }}"
+        aap_token: "{{ aap_token | default(omit) }}"
+        aap_validate_certs: "{{ aap_validate_certs | default(true) }}"
+        page_size: "{{ page_size | default(200) }}"
+        soft_delete: "{{ soft_delete | default(true) }}"
+        return_hostnames: "{{ return_hostnames | default(false) }}"
+      register: soft_delete_hosts_result
+
+    - name: Show soft-delete summary
+      ansible.builtin.debug:
+        msg: "{{ soft_delete_hosts_result.msg }}"
+
+    - name: Show candidate hostnames to soft-delete (sorted, case-insensitive)
+      ansible.builtin.debug:
+        var: candidate_hostnames_sorted
+      vars:
+        candidate_hostnames_sorted: >-
+          {{ soft_delete_hosts_result.candidate_hostnames | sort(case_sensitive=False) }}
+      when:
+        - soft_delete_hosts_result.candidate_hostnames is defined
+        - soft_delete_hosts_result.candidate_hostnames | length > 0
+        - return_hostnames | default(false)
+...
