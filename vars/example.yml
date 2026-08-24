@@ -21,6 +21,10 @@ aap_password: CHANGE_ME
 # aap_validate_certs: true
 #   Validate TLS certificates when calling the gateway/controller API.
 #   Set false for lab hosts with self-signed certificates.
+#   Job templates: maps from the built-in AAP credential injectors (verify_ssl).
+
+# aap_request_timeout: 30
+#   HTTP timeout in seconds. Job templates: maps from request_timeout injector.
 
 # aap_token: "{{ lookup('env', 'AAP_TOKEN') }}"
 #   Optional. Supply an existing OAuth token instead of username/password.

@@ -57,6 +57,13 @@ class TestNormalizeHostname(unittest.TestCase):
         self.assertIsNone(normalize_hostname(None))
         self.assertIsNone(normalize_hostname(""))
 
+    def test_empty_token_string(self):
+        from ansible_collections.lennysh.aap_maintenance.plugins.module_utils.auth import token_value
+
+        self.assertIsNone(token_value(""))
+        self.assertIsNone(token_value("   "))
+        self.assertEqual(token_value("abc"), "abc")
+
 
 class TestSoftDeleteStaleHostMetrics(unittest.TestCase):
     def test_deletes_only_absent_hosts(self):

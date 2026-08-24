@@ -9,8 +9,9 @@
         aap_hostname: "{{ aap_hostname }}"
         aap_username: "{{ aap_username }}"
         aap_password: "{{ aap_password }}"
-        aap_token: "{{ aap_token | default(omit) }}"
+        aap_token: "{{ omit if not (aap_token | default('', true) | string | trim) else aap_token }}"
         aap_validate_certs: "{{ aap_validate_certs | default(true) }}"
+        aap_request_timeout: "{{ aap_request_timeout | default(30) }}"
         page_size: "{{ page_size | default(200) }}"
         soft_delete: "{{ soft_delete | default(false) }}"
         return_hostnames: "{{ return_hostnames | default(false) }}"
@@ -29,5 +30,4 @@
       when:
         - soft_delete_hosts_result.candidate_hostnames is defined
         - soft_delete_hosts_result.candidate_hostnames | length > 0
-        - return_hostnames | default(false)
 ...

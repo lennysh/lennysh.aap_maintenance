@@ -61,4 +61,7 @@ def token_value(raw):
         return None
     if isinstance(raw, dict):
         return raw.get("token") or raw.get("access_token")
+    if isinstance(raw, str):
+        stripped = raw.strip()
+        return stripped if stripped else None
     return raw

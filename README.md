@@ -71,7 +71,29 @@ Tokens you supply yourself are left intact.
 Environment variables are supported (`AAP_HOSTNAME`, `CONTROLLER_HOST`, `AAP_USERNAME`,
 `CONTROLLER_USERNAME`, etc.) — see `vars/example.yml`.
 
-## Installing
+### Job template (built-in AAP credential)
+
+Attach a **Red Hat Ansible Automation Platform** credential to the job template and use
+injectors that set extra vars (names must match what the playbook passes to the module):
+
+```yaml
+extra_vars:
+  aap_hostname: '{{ host }}'
+  aap_username: '{{ username }}'
+  aap_password: '{{ password }}'
+  aap_token: '{{ oauth_token }}'
+  aap_request_timeout: '{{ request_timeout }}'
+  aap_validate_certs: '{{ verify_ssl }}'
+```
+
+Use playbook `lennysh.aap_maintenance.soft_delete_hosts` with `hosts: localhost` and
+`connection: local` (already set in the collection playbook). The module runs on the
+execution environment and calls the gateway API over the network.
+
+When `oauth_token` is empty (username/password credential), the module mints a short-lived
+token and revokes it when finished. Set job-template extra vars for behavior as needed, e.g.
+`soft_delete: true`, `return_hostnames: false`.
+
 
 Install directly from GitHub with Ansible Galaxy:
 
