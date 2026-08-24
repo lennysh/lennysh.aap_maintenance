@@ -1,7 +1,7 @@
 # Ansible Collection - lennysh.aap_maintenance
 
-[![CI](https://github.com/lennysh/aap_maintenance/actions/workflows/tests.yml/badge.svg)](https://github.com/lennysh/aap_maintenance/actions/workflows/tests.yml)
-[![GitHub license](https://img.shields.io/github/license/lennysh/aap_maintenance.svg)](https://github.com/lennysh/aap_maintenance/blob/devel/LICENSE)
+[![CI](https://github.com/lennysh/lennysh.aap_maintenance/actions/workflows/tests.yml/badge.svg)](https://github.com/lennysh/lennysh.aap_maintenance/actions/workflows/tests.yml)
+[![GitHub license](https://img.shields.io/github/license/lennysh/aap_maintenance.svg)](https://github.com/lennysh/lennysh.aap_maintenance/blob/devel/LICENSE)
 
 > **Under construction / pre-1.0.0** — This collection is under active development
 > toward a first stable release. APIs, layouts, and coverage may change
@@ -101,14 +101,14 @@ and optionally lower `page_size` (for example `100`).
 ## Installing
 
 ```bash
-ansible-galaxy collection install git+https://github.com/lennysh/aap_maintenance.git
+ansible-galaxy collection install git+https://github.com/lennysh/lennysh.aap_maintenance.git
 ```
 
 Pin a branch or tag:
 
 ```bash
-ansible-galaxy collection install git+https://github.com/lennysh/aap_maintenance.git,devel
-# ansible-galaxy collection install git+https://github.com/lennysh/aap_maintenance.git,v1.0.0
+ansible-galaxy collection install git+https://github.com/lennysh/lennysh.aap_maintenance.git,devel
+# ansible-galaxy collection install git+https://github.com/lennysh/lennysh.aap_maintenance.git,v1.0.0
 ```
 
 Or via `requirements.yml`:
@@ -116,7 +116,7 @@ Or via `requirements.yml`:
 ```yaml
 ---
 collections:
-  - name: https://github.com/lennysh/aap_maintenance.git
+  - name: https://github.com/lennysh/lennysh.aap_maintenance.git
     type: git
     version: devel
 ...

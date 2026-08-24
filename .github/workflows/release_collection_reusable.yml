@@ -26,7 +26,7 @@ permissions:
 env:
   COLLECTION_NAMESPACE: lennysh
   COLLECTION_NAME: aap_maintenance
-  COLLECTION_REPO: https://github.com/lennysh/aap_maintenance/
+  COLLECTION_REPO: https://github.com/lennysh/lennysh.aap_maintenance/
 
 jobs:
   major_release_gate:

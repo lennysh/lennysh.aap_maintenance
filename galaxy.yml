@@ -8,10 +8,10 @@ description: >-
 readme: README.md
 authors:
   - Lenny Shirley @lennysh
-repository: https://github.com/lennysh/aap_maintenance
-issues: https://github.com/lennysh/aap_maintenance/issues
-documentation: https://github.com/lennysh/aap_maintenance/blob/devel/README.md
-homepage: https://github.com/lennysh/aap_maintenance
+repository: https://github.com/lennysh/lennysh.aap_maintenance
+issues: https://github.com/lennysh/lennysh.aap_maintenance/issues
+documentation: https://github.com/lennysh/lennysh.aap_maintenance/blob/devel/README.md
+homepage: https://github.com/lennysh/lennysh.aap_maintenance
 build_ignore:
   - .ansible
   - .ansible-lint
