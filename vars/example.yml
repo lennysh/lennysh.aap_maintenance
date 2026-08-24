@@ -23,8 +23,10 @@ aap_password: CHANGE_ME
 #   Set false for lab hosts with self-signed certificates.
 #   Job templates: maps from the built-in AAP credential injectors (verify_ssl).
 
-# aap_request_timeout: 30
-#   HTTP timeout in seconds. Job templates: maps from request_timeout injector.
+# aap_request_timeout: 120
+#   HTTP timeout in seconds (connect + read). The playbook defaults to 120 when unset.
+#   Job templates: maps from request_timeout on the credential — raise it for large
+#   inventories if list API pages are slow (for example 300).
 
 # aap_token: "{{ lookup('env', 'AAP_TOKEN') }}"
 #   Optional. Supply an existing OAuth token instead of username/password.
@@ -41,9 +43,8 @@ aap_password: CHANGE_ME
 #   only scan and report how many hosts would be affected — no API deletes.
 
 # page_size: 200
-#   Number of inventory hosts or host_metrics rows per API page. Larger pages
-#   mean fewer HTTP requests but bigger responses. Default 200 is a sensible
-#   controller API page size for most environments.
+#   Number of inventory hosts or host_metrics rows per API page. Larger pages mean fewer
+#   HTTP requests but slower responses; try 100 if you see read timeouts on big inventories.
 
 # return_hostnames: false
 #   When true, include candidate_hostnames in the module result (every hostname

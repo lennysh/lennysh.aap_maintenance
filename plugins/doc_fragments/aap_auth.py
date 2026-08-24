@@ -37,7 +37,9 @@ options:
     default: true
     aliases: [validate_certs, tower_verify_ssl]
   aap_request_timeout:
-    description: HTTP timeout in seconds.
+    description:
+      - HTTP timeout in seconds for connect and response read.
+      - Increase for large inventories when list API pages are slow to return.
     type: float
     default: 30.0
     aliases: [request_timeout]

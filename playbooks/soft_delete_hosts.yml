@@ -11,7 +11,7 @@
         aap_password: "{{ aap_password }}"
         aap_token: "{{ omit if not (aap_token | default('', true) | string | trim) else aap_token }}"
         aap_validate_certs: "{{ aap_validate_certs | default(true) | bool }}"
-        aap_request_timeout: "{{ aap_request_timeout | default(30) }}"
+        aap_request_timeout: "{{ aap_request_timeout | default(120) }}"
         page_size: "{{ page_size | default(200) | int }}"
         soft_delete: "{{ soft_delete | default(false) | bool }}"
         return_hostnames: "{{ return_hostnames | default(false) | bool }}"

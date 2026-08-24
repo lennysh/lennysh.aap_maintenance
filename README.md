@@ -94,8 +94,11 @@ When `oauth_token` is empty (username/password credential), the module mints a s
 token and revokes it when finished. Set job-template extra vars for behavior as needed, e.g.
 `soft_delete: true`, `return_hostnames: false`.
 
+**Large inventories:** if jobs fail with read timeouts while listing hosts, raise
+`request_timeout` on the credential (or set job extra var `aap_request_timeout: 300`)
+and optionally lower `page_size` (for example `100`).
 
-Install directly from GitHub with Ansible Galaxy:
+## Installing
 
 ```bash
 ansible-galaxy collection install git+https://github.com/lennysh/aap_maintenance.git

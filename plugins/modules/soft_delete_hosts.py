@@ -20,7 +20,9 @@ version_added: "0.1.0"
 author: Lenny Shirley (@lennysh)
 options:
   page_size:
-    description: Page size for controller list API requests.
+    description:
+      - Page size for controller list API requests.
+      - Smaller values can help when the controller is slow to return large host lists.
     type: int
     default: 200
   soft_delete:

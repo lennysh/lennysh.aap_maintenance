@@ -1,0 +1,5 @@
+---
+bugfixes:
+  - >-
+    Catch socket read/connect timeouts in the HTTP client and return a clear
+    fail_json message instead of MODULE FAILURE tracebacks.

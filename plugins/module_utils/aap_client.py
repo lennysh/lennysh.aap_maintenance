@@ -10,6 +10,7 @@ __metaclass__ = type
 
 import base64
 import json
+import socket
 
 from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
 from ansible.module_utils.six.moves.urllib.parse import urlencode, urlparse
@@ -28,6 +29,22 @@ class AAPClientError(Exception):
         super(AAPClientError, self).__init__(message)
         self.status = status
         self.body = body
+
+
+def _is_timeout_error(exc):
+    if isinstance(exc, (socket.timeout, TimeoutError)):
+        return True
+    reason = getattr(exc, "reason", None)
+    return isinstance(reason, (socket.timeout, TimeoutError))
+
+
+def _timeout_error_message(method, url, timeout):
+    return (
+        "Timed out during {0} {1} (aap_request_timeout={2}s). "
+        "Large inventories often need a higher timeout and/or a smaller page_size.".format(
+            method, url, timeout
+        )
+    )
 
 
 class AAPClient(object):
@@ -130,7 +147,10 @@ class AAPClient(object):
                 validate_certs=self.validate_certs,
                 timeout=self.request_timeout,
             )
-            raw = resp.read()
+            try:
+                raw = resp.read()
+            except (socket.timeout, TimeoutError):
+                raise AAPClientError(_timeout_error_message(method, url, self.request_timeout))
             if not raw:
                 return {}
             return json.loads(raw.decode("utf-8"))
@@ -146,6 +166,8 @@ class AAPClient(object):
                 body=parsed,
             )
         except URLError as exc:
+            if _is_timeout_error(exc):
+                raise AAPClientError(_timeout_error_message(method, url, self.request_timeout))
             reason = getattr(exc, "reason", exc)
             raise AAPClientError(
                 "Failed to reach {0} ({1}): {2}. "
@@ -154,6 +176,8 @@ class AAPClient(object):
                     url, method, reason, self.request_timeout
                 )
             )
+        except (socket.timeout, TimeoutError):
+            raise AAPClientError(_timeout_error_message(method, url, self.request_timeout))
 
     def get(self, path, query=None):
         return self.request("GET", path, query=query)
