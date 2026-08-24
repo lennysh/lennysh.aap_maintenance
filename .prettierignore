@@ -1,0 +1,17 @@
+# files we don't want prettier to ever look into
+.*/
+coverage/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# A linked collection directory created by pytest-ansible-units
+collections/
+
+tests/output/

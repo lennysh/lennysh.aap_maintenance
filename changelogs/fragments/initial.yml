@@ -1,0 +1,6 @@
+---
+major_changes:
+  - >-
+    Initial collection skeleton for AAP 2.5+ maintenance
+    (cleanup, health checks, operational tasks).
+...

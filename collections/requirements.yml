@@ -1,0 +1,4 @@
+---
+# No external collection dependencies. Modules use ansible-core + AAP REST.
+collections: []
+...

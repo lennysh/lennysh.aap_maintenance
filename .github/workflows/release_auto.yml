@@ -1,0 +1,122 @@
+---
+name: Release - Automated
+
+on:
+  schedule:
+    - cron: "0 0 1,15 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  calculate_version:
+    name: Calculate Collection Version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      collection_version: ${{ steps.bump-semver.outputs.new_version }}
+      change_level: ${{ steps.bump_level.outputs.level }}
+      change_present: ${{ steps.bump_level.outputs.change_present }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Determine current version
+        id: current_version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          GIT_TAG=$(git tag --list --sort=-version:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n1)
+          echo "Latest git tag: ${GIT_TAG:-none}"
+
+          GH_RELEASE=$(gh release view --json tagName -q '.tagName' 2>/dev/null || true)
+          echo "Latest GitHub release: ${GH_RELEASE:-none}"
+
+          if [ -z "$GIT_TAG" ] && [ -z "$GH_RELEASE" ]; then
+            echo '::error::No semver git tag or GitHub release found. This workflow only bumps an existing version. For a clean repo, run Actions → "Release - Manual (one-off)" (workflow_dispatch) first; use this workflow after 1.0.0 exists.'
+            exit 1
+          fi
+
+          higher_version() {
+            printf '%s\n%s' "$1" "$2" | sort -t. -k1,1n -k2,2n -k3,3n | tail -n1
+          }
+
+          if [ -n "$GIT_TAG" ] && [ -n "$GH_RELEASE" ]; then
+            CURRENT=$(higher_version "$GIT_TAG" "$GH_RELEASE")
+          elif [ -n "$GIT_TAG" ]; then
+            CURRENT="$GIT_TAG"
+          else
+            CURRENT="$GH_RELEASE"
+          fi
+
+          echo "Resolved current version: $CURRENT"
+          echo "current_version=$CURRENT" >> "$GITHUB_OUTPUT"
+
+      - name: Calculate bump level
+        id: bump_level
+        shell: bash
+        run: |
+          if [ -z "$(ls changelogs/fragments/*.yml changelogs/fragments/*.yaml 2>/dev/null)" ]; then
+            echo "change_present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "change_present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+          MAJOR=1
+          if grep -RE '(major_changes|breaking_changes)' changelogs/fragments 2>/dev/null; then
+            MAJOR=0
+          fi
+          MINOR=1
+          if grep -R minor_changes changelogs/fragments 2>/dev/null; then
+            MINOR=0
+          fi
+
+          if [ $MAJOR -eq 0 ]; then
+            echo "level=major" >> "$GITHUB_OUTPUT"
+            echo "Determined change level: major"
+          elif [ $MINOR -eq 0 ]; then
+            echo "level=minor" >> "$GITHUB_OUTPUT"
+            echo "Determined change level: minor"
+          else
+            echo "level=patch" >> "$GITHUB_OUTPUT"
+            echo "Determined change level: patch"
+          fi
+
+      - name: Bump version
+        id: bump-semver
+        shell: bash
+        run: |
+          CURRENT="${{ steps.current_version.outputs.current_version }}"
+          LEVEL="${{ steps.bump_level.outputs.level }}"
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+          case "$LEVEL" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
+
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "Bumping $CURRENT ($LEVEL) -> $NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+  release:
+    name: Run release pipeline
+    needs: calculate_version
+    if: ${{ needs.calculate_version.outputs.change_present != 'false' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: ./.github/workflows/release_collection_reusable.yml
+    with:
+      collection_version: ${{ needs.calculate_version.outputs.collection_version }}
+      change_level: ${{ needs.calculate_version.outputs.change_level }}
+      change_present: ${{ needs.calculate_version.outputs.change_present }}
+      skip_major_release_gate: ${{ github.event_name == 'workflow_dispatch' }}
+    secrets: inherit
+...
