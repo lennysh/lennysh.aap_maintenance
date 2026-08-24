@@ -12,7 +12,7 @@
         aap_token: "{{ aap_token | default(omit) }}"
         aap_validate_certs: "{{ aap_validate_certs | default(true) }}"
         page_size: "{{ page_size | default(200) }}"
-        soft_delete: "{{ soft_delete | default(true) }}"
+        soft_delete: "{{ soft_delete | default(false) }}"
         return_hostnames: "{{ return_hostnames | default(false) }}"
       register: soft_delete_hosts_result
 
