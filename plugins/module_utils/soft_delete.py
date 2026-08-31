@@ -62,7 +62,7 @@ def soft_delete_stale_host_metrics(
             if return_hostnames:
                 candidate_hostnames.append(hostname)
             if soft_delete and not check_mode:
-                delete_path = "{0}{1}/".format(metrics_path.rstrip("/"), metric_id)
+                delete_path = "{0}/{1}/".format(metrics_path.rstrip("/"), metric_id)
                 client.delete(delete_path)
                 soft_deleted_count += 1
 
