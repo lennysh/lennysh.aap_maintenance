@@ -1,10 +1,10 @@
 ---
 namespace: lennysh
 name: aap_maintenance
-version: 0.1.0-devel
+version: 0.1.1-devel
 description: >-
   Maintenance utilities for Ansible Automation Platform 2.5+
-  (cleanup, health checks, operational tasks).
+  (cleanup, health checks, installer secret export, operational tasks).
 readme: README.md
 authors:
   - Lenny Shirley @lennysh

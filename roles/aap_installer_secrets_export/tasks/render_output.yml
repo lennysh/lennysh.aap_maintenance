@@ -1,0 +1,34 @@
+---
+- name: Ensure output directory exists
+  ansible.builtin.file:
+    path: "{{ installer_secrets_output_dir }}"
+    state: directory
+    mode: "0700"
+
+- name: Write installer secrets YAML vars file
+  ansible.builtin.template:
+    src: installer-secrets.yml.j2
+    dest: "{{ installer_secrets_output_dir }}/{{ installer_secrets_output_basename }}.yml"
+    mode: "{{ installer_secrets_output_mode }}"
+  no_log: true
+
+- name: Write inventory copy/paste snippet
+  ansible.builtin.template:
+    src: installer-secrets-inventory.snippet.j2
+    dest: >-
+      {{ installer_secrets_output_dir }}/{{ installer_secrets_output_basename }}-inventory.snippet
+    mode: "{{ installer_secrets_output_mode }}"
+  no_log: true
+
+- name: Show export summary
+  ansible.builtin.debug:
+    msg:
+      - "Exported {{ _installer_secrets_export | dict2items | map(attribute='value') | map('length') | sum }} secret values across {{ _installer_secrets_export | length }} inventory groups."
+      - "YAML vars: {{ installer_secrets_output_dir }}/{{ installer_secrets_output_basename }}.yml"
+      - "INI snippet: {{ installer_secrets_output_dir }}/{{ installer_secrets_output_basename }}-inventory.snippet"
+      - "Encrypt the YAML file before storing: ansible-vault encrypt {{ installer_secrets_output_dir }}/{{ installer_secrets_output_basename }}.yml"
+
+- name: Show non-fatal warnings
+  ansible.builtin.debug:
+    var: _installer_secrets_warnings
+  when: _installer_secrets_warnings | length > 0

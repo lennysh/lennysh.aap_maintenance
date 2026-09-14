@@ -1,0 +1,56 @@
+---
+- name: Reset resolved catalog
+  ansible.builtin.set_fact:
+    _installer_secrets_resolved_catalog: []
+
+- name: Resolve inventory group for each catalog entry
+  ansible.builtin.set_fact:
+    _installer_secrets_resolved_catalog: >-
+      {{ _installer_secrets_resolved_catalog + (
+           [_catalog_item | combine({
+             'resolved_group': _matched_group,
+             'resolved_host': groups[_matched_group][0]
+           })]
+           if _matched_group else []
+         )
+      }}
+  vars:
+    _group_candidates: >-
+      {{ _catalog_item.inventory_groups
+         | default([_catalog_item.inventory_group | default('')])
+         | reject('equalto', '')
+         | list }}
+    _matched_group: "{{ _group_candidates | select('in', groups) | list | first | default('') }}"
+  loop: "{{ _aap_installer_secrets_catalog }}"
+  loop_control:
+    loop_var: _catalog_item
+    label: "{{ _catalog_item.key }}"
+
+- name: Drop Lightspeed when disabled
+  ansible.builtin.set_fact:
+    _installer_secrets_resolved_catalog: >-
+      {{ _installer_secrets_resolved_catalog | rejectattr('key', 'equalto', 'lightspeed') | list }}
+  when: not (installer_secrets_include_lightspeed | bool)
+
+- name: Drop Metrics when disabled
+  ansible.builtin.set_fact:
+    _installer_secrets_resolved_catalog: >-
+      {{ _installer_secrets_resolved_catalog | rejectattr('key', 'equalto', 'metrics') | list }}
+  when: not (installer_secrets_include_metrics | bool)
+
+- name: Fail when required component group is missing
+  ansible.builtin.assert:
+    that:
+      - _catalog_item.resolved_group is defined
+      - _catalog_item.resolved_group | length > 0
+    fail_msg: >-
+      Inventory group for {{ _catalog_item.key }} is missing
+      (expected one of {{ _catalog_item.inventory_groups
+      | default([_catalog_item.inventory_group | default('none')]) }}).
+  loop: "{{ _aap_installer_secrets_catalog }}"
+  loop_control:
+    loop_var: _catalog_item
+    label: "{{ _catalog_item.key }}"
+  when:
+    - installer_secrets_strict_groups | bool
+    - not (_catalog_item.optional | default(false) | bool)

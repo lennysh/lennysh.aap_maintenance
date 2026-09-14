@@ -9,16 +9,44 @@
 
 **Maintenance utilities for Ansible Automation Platform (AAP) 2.5+.**
 
-Operational tasks on a running platform: cleanup stale data, health checks, and
-related maintenance workflows. No other Ansible collections are required.
+Operational tasks on a running platform: cleanup stale data, health checks, export
+installer secret keys for safekeeping, and related maintenance workflows. No other
+Ansible collections are required for API-only modules; the installer secrets export
+role requires `containers.podman` when `install_type=containerized`.
 
 ## Modules
 
 | Module | Purpose |
 | ------ | ------- |
 | `soft_delete_hosts` | Soft-delete stale `host_metrics` rows not present in any inventory |
+| `aap_installer_secrets_gather` | Read RPM installer crypto secrets from component host paths (used by the export role) |
 
-Example playbook: `playbooks/soft_delete_hosts.yml`.
+## Roles
+
+| Role | Purpose |
+| ---- | ------- |
+| `aap_installer_secrets_export` | Export installer-generated secret keys to vault-ready vars files (RPM or containerized, AAP 2.6+) |
+
+Example playbook: `playbooks/export_installer_secrets.yml` (requires `-e install_type=rpm|containerized`).
+
+See `roles/aap_installer_secrets_export/README.md` for full usage.
+
+### Export installer secret keys
+
+After a fresh install, capture auto-generated Django / Hub encryption keys before they are lost on rebuild:
+
+```bash
+ansible-playbook -i inventory playbooks/export_installer_secrets.yml \
+  -e install_type=containerized
+
+ansible-vault encrypt installer-secrets.yml
+```
+
+Reuse on a later install:
+
+```bash
+ansible-playbook -i inventory .../install -e @installer-secrets.yml
+```
 
 ### Soft-delete stale host metrics
 

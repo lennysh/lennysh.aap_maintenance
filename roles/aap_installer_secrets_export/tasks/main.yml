@@ -1,0 +1,38 @@
+---
+- name: Validate install_type
+  ansible.builtin.assert:
+    that:
+      - install_type is defined
+      - install_type in ['rpm', 'containerized']
+    fail_msg: >-
+      Set install_type to rpm or containerized (for example -e install_type=containerized).
+
+- name: Initialize export facts
+  ansible.builtin.set_fact:
+    _installer_secrets_export: {}
+    _installer_secrets_notes: {}
+    _installer_secrets_warnings: []
+
+- name: Resolve component catalog against inventory groups
+  ansible.builtin.include_tasks: resolve_catalog.yml
+
+- name: Publish active catalog entries
+  ansible.builtin.set_fact:
+    _installer_secrets_active_catalog: "{{ _installer_secrets_resolved_catalog }}"
+
+- name: Require at least one component group in inventory
+  ansible.builtin.assert:
+    that:
+      - _installer_secrets_active_catalog | length > 0
+    fail_msg: >-
+      No supported installer component groups found in inventory for install_type={{ install_type }}.
+
+- name: Gather secrets from platform hosts
+  ansible.builtin.include_tasks: gather.yml
+  loop: "{{ _installer_secrets_active_catalog }}"
+  loop_control:
+    loop_var: _catalog_entry
+    label: "{{ _catalog_entry.key }}"
+
+- name: Write exported secret files
+  ansible.builtin.include_tasks: render_output.yml

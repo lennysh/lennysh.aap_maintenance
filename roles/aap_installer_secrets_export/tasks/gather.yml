@@ -1,0 +1,13 @@
+---
+- name: Resolve target host for {{ _catalog_entry.key }}
+  ansible.builtin.set_fact:
+    _installer_secrets_target_host: "{{ _catalog_entry.resolved_host }}"
+    _installer_secrets_target_group: "{{ _catalog_entry.resolved_group }}"
+
+- name: Gather RPM secrets for {{ _catalog_entry.key }}
+  ansible.builtin.include_tasks: gather_rpm.yml
+  when: install_type == 'rpm'
+
+- name: Gather containerized secrets for {{ _catalog_entry.key }}
+  ansible.builtin.include_tasks: gather_containerized.yml
+  when: install_type == 'containerized'

@@ -1,0 +1,19 @@
+---
+# Install method: rpm or containerized (required at runtime).
+install_type: ""
+
+# Directory for exported files (created if missing).
+installer_secrets_output_dir: "{{ playbook_dir }}"
+
+# Basename for output files (without extension).
+installer_secrets_output_basename: installer-secrets
+
+# File mode for exported secret files.
+installer_secrets_output_mode: "0600"
+
+# Include optional 2.6+ components when their inventory groups exist.
+installer_secrets_include_lightspeed: true
+installer_secrets_include_metrics: true
+
+# When true, fail if a catalogued group is missing from the inventory.
+installer_secrets_strict_groups: false

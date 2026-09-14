@@ -1,0 +1,30 @@
+---
+- name: Read RPM secrets for {{ _catalog_entry.key }}
+  lennysh.aap_maintenance.aap_installer_secrets_gather:
+    component: "{{ _catalog_entry.rpm_component }}"
+  become: true
+  become_user: "{{ _catalog_entry.rpm_become_user }}"
+  delegate_to: "{{ _installer_secrets_target_host }}"
+  register: _installer_secrets_gather_result
+  no_log: true
+
+- name: Merge RPM secrets for {{ _catalog_entry.key }}
+  ansible.builtin.set_fact:
+    _installer_secrets_export: >-
+      {{ _installer_secrets_export | combine({
+           _installer_secrets_target_group: (
+             _installer_secrets_export[_installer_secrets_target_group] | default({})
+             | combine(_installer_secrets_gather_result.installer_vars)
+           )
+         }, recursive=True) }}
+    _installer_secrets_notes: >-
+      {{ _installer_secrets_notes | combine({
+           _installer_secrets_target_group: (
+             _installer_secrets_notes[_installer_secrets_target_group] | default({})
+             | combine(_installer_secrets_gather_result.notes | default({}))
+           )
+         }, recursive=True) }}
+    _installer_secrets_warnings: >-
+      {{ _installer_secrets_warnings
+         + (_installer_secrets_gather_result.warnings | default([]))
+         | map('regex_replace', '^', _catalog_entry.key ~ ': ') | list }}

@@ -1,0 +1,54 @@
+---
+_aap_installer_secrets_catalog:
+  - key: controller
+    inventory_group: automationcontroller
+    rpm_become_user: awx
+    rpm_component: controller
+    containerized_secrets:
+      - var: controller_secret_key
+        podman_secret: controller_secret_key
+
+  - key: gateway
+    inventory_group: automationgateway
+    rpm_become_user: gateway
+    rpm_component: gateway
+    containerized_secrets:
+      - var: gateway_secret_key
+        podman_secret: gateway_secret_key
+
+  - key: hub
+    inventory_group: automationhub
+    rpm_become_user: pulp
+    rpm_component: hub
+    containerized_secrets:
+      - var: hub_secret_key
+        podman_secret: hub_secret_key
+      - var: hub_database_fields
+        podman_secret: hub_database_fields
+        note: >-
+          Podman secret name hub_database_fields. No standard inventory-example
+          scalar; preserve this value for restore or manual podman secret creation.
+
+  - key: eda
+    inventory_groups:
+      - automationeda
+      - automationedacontroller
+    rpm_become_user: eda
+    rpm_component: eda
+    containerized_secrets:
+      - var: eda_secret_key
+        podman_secret: eda_secret_key
+
+  - key: lightspeed
+    inventory_group: ansiblelightspeed
+    optional: true
+    containerized_secrets:
+      - var: lightspeed_secret_key
+        podman_secret: lightspeed_secret_key
+
+  - key: metrics
+    inventory_group: automationmetrics
+    optional: true
+    containerized_secrets:
+      - var: automationmetrics_secret_key
+        podman_secret: automationmetrics_secret_key

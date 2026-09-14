@@ -1,0 +1,47 @@
+---
+galaxy_info:
+  role_name: aap_installer_secrets_export
+  author: Lenny Shirley
+  description: >-
+    Export AAP installer-generated crypto secrets from RPM or containerized
+    deployments into inventory-ready vars files.
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.16.0"
+
+dependencies: []
+
+argument_specs:
+  main:
+    short_description: Export installer secret keys to vars files
+    options:
+      install_type:
+        type: str
+        required: true
+        choices:
+          - rpm
+          - containerized
+        description: AAP install method used for this inventory.
+      installer_secrets_output_dir:
+        type: str
+        default: "{{ playbook_dir }}"
+        description: Directory where exported files are written.
+      installer_secrets_output_basename:
+        type: str
+        default: installer-secrets
+        description: Basename for installer-secrets.yml and inventory snippet.
+      installer_secrets_output_mode:
+        type: str
+        default: "0600"
+        description: POSIX mode for exported secret files.
+      installer_secrets_include_lightspeed:
+        type: bool
+        default: true
+        description: Export Lightspeed secrets when ansiblelightspeed group exists.
+      installer_secrets_include_metrics:
+        type: bool
+        default: true
+        description: Export Metrics secrets when automationmetrics group exists.
+      installer_secrets_strict_groups:
+        type: bool
+        default: false
+        description: Fail when required component groups are absent from inventory.

@@ -1,0 +1,47 @@
+---
+- name: Read podman secrets for {{ _catalog_entry.key }} on {{ _installer_secrets_target_host }}
+  containers.podman.podman_secret_info:
+    name: "{{ _secret_entry.podman_secret }}"
+  delegate_to: "{{ _installer_secrets_target_host }}"
+  register: _installer_secrets_podman_reads
+  no_log: true
+  loop: "{{ _catalog_entry.containerized_secrets }}"
+  loop_control:
+    loop_var: _secret_entry
+    label: "{{ _secret_entry.podman_secret }}"
+
+- name: Merge containerized secret {{ item._secret_entry.var }}
+  ansible.builtin.set_fact:
+    _installer_secrets_export: >-
+      {{ _installer_secrets_export | combine({
+           _installer_secrets_target_group: (
+             _installer_secrets_export[_installer_secrets_target_group] | default({})
+             | combine({item._secret_entry.var: item.secrets[0].SecretData})
+           )
+         }, recursive=True) }}
+    _installer_secrets_notes: >-
+      {{ _installer_secrets_notes | combine({
+           _installer_secrets_target_group: (
+             _installer_secrets_notes[_installer_secrets_target_group] | default({})
+             | combine(
+               {item._secret_entry.var: item._secret_entry.note}
+               if item._secret_entry.note is defined else {}
+             )
+           )
+         }, recursive=True) }}
+  loop: "{{ _installer_secrets_podman_reads.results }}"
+  when: item.secrets | default([]) | length > 0
+  no_log: true
+
+- name: Record missing podman secrets for {{ _catalog_entry.key }}
+  ansible.builtin.set_fact:
+    _installer_secrets_warnings: >-
+      {{ _installer_secrets_warnings + [
+           '{0}: podman secret {1} not found on {2}'.format(
+             _catalog_entry.key,
+             item._secret_entry.podman_secret,
+             _installer_secrets_target_host
+           )
+         ] }}
+  loop: "{{ _installer_secrets_podman_reads.results }}"
+  when: item.secrets | default([]) | length == 0
